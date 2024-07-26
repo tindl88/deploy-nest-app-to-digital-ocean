@@ -1,4 +1,4 @@
-name: Deploy Nest API to Digital Ocean - STAGE
+name: Deploy Nest API to Digital Ocean STAGE
 
 env:
   APP_ENV: ${{ secrets.STAGE_ENV }}

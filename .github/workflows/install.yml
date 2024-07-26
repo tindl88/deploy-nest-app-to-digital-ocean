@@ -21,10 +21,6 @@ jobs:
             # Pull the PostgreSQL image
             docker pull postgres:13
 
-            # Stop and remove existing container if it exists
-            docker stop postgres_container || true
-            docker rm postgres_container || true
-
             # Run PostgreSQL container
             docker run -d \
               --name postgres_container \
@@ -35,3 +31,9 @@ jobs:
 
             # Verify the container is running
             docker ps | grep postgres_container
+
+            # Open port 5432 (PostgreSQL)
+            ufw allow 5432/tcp
+
+            # Reload UFW to apply changes
+            ufw reload

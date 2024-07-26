@@ -1,0 +1,54 @@
+name: Deploy Nest API to Digital Ocean - STAGE
+
+env:
+  APP_ENV: ${{ secrets.STAGE_ENV }}
+  APP_NAME: nest-app
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Code
+        uses: actions/checkout@v3
+
+      - name: Extract STAGE_ENV to .env
+        run: |
+          rm -r -f .env
+          touch .env_temp
+          echo $APP_ENV | tee .env_temp
+          sed 's/ /\n/g' .env_temp >> .env
+          rm -r -f .env_temp
+
+      - name: Build image without docker-compose, just use Dockerfile
+        run: |
+          docker build -t ${{ env.APP_NAME }} .
+          docker save -o ${{ env.APP_NAME }}.tar ${{ env.APP_NAME }}
+
+      - name: Connect to your server via SSH key and copy docker image from Github Action server to your server
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.STAGE_SERVER_HOST }}
+          username: ${{ secrets.STAGE_SERVER_USERNAME }}
+          port: 22
+          key: ${{ secrets.STAGE_SERVER_KEY_SSH }}
+          source: "${{ env.APP_NAME }}.tar,docker-compose.yml"
+          target: "~/${{ env.APP_NAME }}"
+
+      - name: Connect to your server via SSH key and run linux command on your server to deploy or update app
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_SERVER_HOST }}
+          username: ${{ secrets.STAGE_SERVER_USERNAME }}
+          port: 22
+          key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
+          script_stop: true
+          script: |
+            cd ~/${{ env.APP_NAME }}
+            docker load --input ${{ env.APP_NAME }}.tar
+            docker-compose up -d --force-recreate --no-build
+            rm -rf ${{ env.APP_NAME }}.tar
+            docker image prune -a -f

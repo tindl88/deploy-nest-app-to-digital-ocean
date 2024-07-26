@@ -7,10 +7,7 @@ RUN apk add --no-cache libc6-compat
 # Create app folder
 WORKDIR /usr/app
 
-COPY start.sh /usr/app/
 COPY tsconfig.json /usr/app/
-
-RUN chmod +x /usr/app/start.sh
 
 # Set to dev environment
 ENV NODE_ENV development

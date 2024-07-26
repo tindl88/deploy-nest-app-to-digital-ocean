@@ -1,0 +1,36 @@
+name: Install PostgresQL Database (Docker)
+
+on:
+  workflow_dispatch:
+
+env:
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+
+jobs:
+  install-postgres:
+    runs-on: ubuntu-latest
+      - name: Connect to your server via SSH key and run linux command on your server to install app
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_SERVER_HOST }}
+          username: ${{ secrets.STAGE_SERVER_USERNAME }}
+          port: 22
+          key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
+          script: |
+            # Pull the PostgreSQL image
+            docker pull postgres:13
+
+            # Stop and remove existing container if it exists
+            docker stop postgres_container || true
+            docker rm postgres_container || true
+
+            # Run PostgreSQL container
+            docker run -d \
+              --name postgres_container \
+              -e POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }} \
+              -p 5432:5432 \
+              -v postgres_data:/var/lib/postgresql/data \
+              postgres:13
+
+            # Verify the container is running
+            docker ps | grep postgres_container

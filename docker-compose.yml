@@ -1,0 +1,15 @@
+version: '3.9'
+
+services:
+  app:
+    image: nest-app
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: ${NODE_ENV}
+    env_file:
+      - .env
+    ports:
+      - 3500:3500

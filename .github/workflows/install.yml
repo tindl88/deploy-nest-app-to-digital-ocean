@@ -1,4 +1,4 @@
-name: Install PostgresQL Database (Docker)
+name: Install PostgreSQL Database (Docker)
 
 on:
   workflow_dispatch:
@@ -9,7 +9,8 @@ env:
 jobs:
   install-postgres:
     runs-on: ubuntu-latest
-      - name: Connect to your server via SSH key and run linux command on your server to install app
+    steps:
+      - name: Connect to server and install PostgreSQL
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.STAGE_SERVER_HOST }}

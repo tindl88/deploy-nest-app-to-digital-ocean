@@ -5,6 +5,7 @@ on:
 
 env:
   POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  POSTGRES_TEST_PASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
 
 jobs:
   install-postgres:
@@ -29,11 +30,22 @@ jobs:
               -v postgres_data:/var/lib/postgresql/data \
               postgres:13
 
+            # Run PostgreSQL Test container
+            docker run -d \
+              --name postgres_dbtest \
+              -e POSTGRES_TEST_PASSWORD=${{ env.POSTGRES_TEST_PASSWORD }} \
+              -p 5436:5432 \
+              -v postgres_data:/var/lib/postgresql/data \
+              postgres:13
+
             # Verify the container is running
             docker ps | grep postgres_container
 
             # Open port 5432 (PostgreSQL)
             ufw allow 5432/tcp
+
+            # Open port 5436 (Database Test)
+            ufw allow 5436/tcp
 
             # Reload UFW to apply changes
             ufw reload

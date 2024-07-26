@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.STAGE_SERVER_USERNAME }}
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
-          source: "${{ env.APP_NAME }}.tar,docker-compose.yml"
+          source: "${{ env.APP_NAME }}.tar,docker-compose.yml,.env"
           target: "~/${{ env.APP_NAME }}"
 
       - name: Connect to your server via SSH key and run linux command on your server to deploy or update app

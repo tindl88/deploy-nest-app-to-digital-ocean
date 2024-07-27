@@ -67,6 +67,10 @@ jobs:
             # Pull PostgreSQL image
             docker pull postgres:14
 
+            # Stop and remove existing container if it exists
+            docker stop postgres_db || true
+            docker rm postgres_db || true
+
             # Run Database
             docker run -d \
               --name postgres_db \

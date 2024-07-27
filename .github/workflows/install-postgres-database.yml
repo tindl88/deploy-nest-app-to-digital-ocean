@@ -10,15 +10,27 @@ jobs:
   install-postgres:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug DATABASE secret
+        run: |
+          echo "DATABASE secret: $DATABASE"
+
       - name: Parse DATABASE secret
         run: |
+          # Debug output for the DATABASE variable
+          echo "Parsing DATABASE secret"
+
           # Split the DATABASE variable by ';'
-          IFS=';' read -r -a prod_vars <<< "${{ env.DATABASE }}"
-          # Export each key-value pair
+          IFS=';' read -r -a prod_vars <<< "$DATABASE"
+
+          # Print the length of the array for debugging
+          echo "Number of elements: ${#prod_vars[@]}"
+
+          # Export each key-value pair and print for debugging
           for var in "${prod_vars[@]}"; do
-            echo "$var"
+            echo "Processing: $var"
             export $var
           done
+
           # Save to $GITHUB_ENV for use in later steps
           echo "AP_DB_PORT=${AP_DB_PORT}" >> $GITHUB_ENV
           echo "AP_DB_NAME=${AP_DB_NAME}" >> $GITHUB_ENV
@@ -26,6 +38,15 @@ jobs:
           echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}" >> $GITHUB_ENV
           echo "AP_DB_SCHEMA=${AP_DB_SCHEMA}" >> $GITHUB_ENV
           echo "AP_DB_LOGS=${AP_DB_LOGS}" >> $GITHUB_ENV
+
+      - name: Verify environment variables
+        run: |
+          echo "AP_DB_PORT=$AP_DB_PORT"
+          echo "AP_DB_NAME=$AP_DB_NAME"
+          echo "AP_DB_USERNAME=$AP_DB_USERNAME"
+          echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}"
+          echo "AP_DB_SCHEMA=$AP_DB_SCHEMA"
+          echo "AP_DB_LOGS=$AP_DB_LOGS"
 
       - name: Connect to server and install PostgreSQL
         uses: appleboy/ssh-action@v1.0.0
@@ -35,14 +56,16 @@ jobs:
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
-            docker pull postgres:14
-
+            # Print environment variables for debugging
             echo "AP_DB_PORT=$AP_DB_PORT"
             echo "AP_DB_NAME=$AP_DB_NAME"
             echo "AP_DB_USERNAME=$AP_DB_USERNAME"
             echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}"
             echo "AP_DB_SCHEMA=$AP_DB_SCHEMA"
             echo "AP_DB_LOGS=$AP_DB_LOGS"
+
+            # Pull PostgreSQL image
+            docker pull postgres:14
 
             # Run Database
             docker run -d \

@@ -57,6 +57,7 @@ jobs:
             # Configure UFW
             echo "Configuring UFW..."
             sudo ufw enable
+            echo 'y'
             sudo ufw allow 80
             sudo ufw allow 443
             sudo ufw allow 81

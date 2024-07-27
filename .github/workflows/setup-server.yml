@@ -51,16 +51,16 @@ jobs:
               echo "Docker Compose file created."
 
               # Start the Nginx Proxy Manager
-              docker-compose up -d
+              sudo docker-compose up -d
               echo "Nginx Proxy Manager is now running."
             fi
             # Configure UFW
             echo "Configuring UFW..."
-            ufw enable
-            ufw allow 80/tcp
-            ufw allow 443/tcp
-            ufw allow 81/tcp
-            ufw allow 22/tcp
-            ufw reload
-            ufw status
+            sudo ufw enable
+            sudo ufw allow 80/tcp
+            sudo ufw allow 443/tcp
+            sudo ufw allow 81/tcp
+            sudo ufw allow 22/tcp
+            sudo ufw reload
+            sudo ufw status
             echo "Ports 80, 81, and 443 have been opened."

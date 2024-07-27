@@ -1,0 +1,25 @@
+name: Check health server die or alive
+
+on:
+  schedule:
+    - cron: '0 */1 * * *' # Runs every 60 minutes\
+
+
+permissions:
+  contents: 'write'
+  packages: 'write'
+
+jobs:
+  check_server_prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check backend prod
+        run: curl -m 5 https://api.com/api/v1
+
+      - name: Archive Test Results
+        if: failure()
+        uses: teknatha136/actions-google-chat-text-message@main
+        with:
+          google-chat-webhook: 'linkwebhook'
+          text-message: 😭 Your server PROD have problem

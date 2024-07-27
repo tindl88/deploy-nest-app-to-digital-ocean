@@ -1,0 +1,63 @@
+name: Setup Server
+
+on:
+  workflow_dispatch:
+
+jobs:
+  install-platform:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Connect to server and install softwares
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.STAGE_SERVER_HOST }}
+          username: ${{ secrets.STAGE_SERVER_USERNAME }}
+          port: 22
+          key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
+          script: |
+            # Install Docker compose
+            curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+            # Install Nginx Proxy Manager
+            mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
+
+            # Create the Docker Compose file
+            filename="docker-compose.yml"
+
+            cat << EOF > $filename
+            version: '3.8'
+            services:
+              app:
+                image: 'jc21/nginx-proxy-manager:latest'
+                restart: unless-stopped
+                ports:
+                  - '80:80'
+                  - '81:81'
+                  - '443:443'
+                volumes:
+                  - ./data:/data
+                  - ./letsencrypt:/etc/letsencrypt
+            EOF
+
+            echo "Docker Compose file '$filename' has been created."
+            echo "Nginx Proxy Manager is now running."
+
+            # Open port 80 (HTTP)
+            ufw allow 80/tcp
+
+            # Open port 443 (HTTPS)
+            ufw allow 443/tcp
+
+            # Open port 81
+            ufw allow 81
+
+            # Fix port 22 issue connect on github action
+            ufw allow 22/tcp
+
+            # Reload UFW to apply changes
+            ufw reload
+
+            # Display the status of UFW
+            ufw status
+
+            echo "Ports 80, 81, and 443 have been opened."

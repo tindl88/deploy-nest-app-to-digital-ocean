@@ -1,16 +1,25 @@
-name: Install PostgreSQL Database (Docker)
+name: 2. Install PostgreSQL Databases
 
 on:
   workflow_dispatch:
 
 env:
-  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-  POSTGRES_TEST_PASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
+  DATABASE_PROD: ${{ secrets.POSTGRES_DB }}
+  DATABASE_TEST: ${{ secrets.DATABASE_TEST }}
 
 jobs:
   install-postgres:
     runs-on: ubuntu-latest
     steps:
+      - name: Parse DATABASE_PROD secret
+        id: parse_prod
+        run: |
+          IFS=';' read -r -a prod_vars <<< "${{ env.DATABASE_PROD }}"
+          for var in "${prod_vars[@]}"; do
+            export $var
+            echo "$var" >> $GITHUB_ENV
+          done
+
       - name: Connect to server and install PostgreSQL
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -19,25 +28,26 @@ jobs:
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
-            # Pull the PostgreSQL image
             docker pull postgres:14
 
-            # Run Database (for production)
+            # AP_DB_PORT=5432
+            # AP_DB_NAME=postgres
+            # AP_DB_USERNAME=postgres
+            # AP_DB_PASSWORD=postgres
+            # AP_DB_SCHEMA=public
+            # AP_DB_LOGS=true
+
+            # Run Database
             docker run -d \
               --name postgres_db \
-              -e POSTGRES_PASSWORD=${{ env.POSTGRES_PASSWORD }} \
+              -e POSTGRES_PASSWORD=$AP_DB_PASSWORD \
+              -e POSTGRES_USER=$AP_DB_USERNAME \
+              -e POSTGRES_DB=$AP_DB_NAME \
               -p 5432:5432 \
               -v postgres_data:/var/lib/postgresql/data \
               postgres:14
 
-            # Run Database (for testing)
-            docker run -d \
-              --name postgres_dbtest \
-              -e POSTGRES_TEST_PASSWORD=${{ env.POSTGRES_TEST_PASSWORD }} \
-              -p 5436:5432 \
-              -v postgres_data:/var/lib/postgresql/data \
-              postgres:14
-
-            ufw allow 5432
-            ufw allow 5436
-            ufw reload
+            # Allow the necessary ports through the firewall
+            sudo ufw allow 5432
+            sudo ufw reload
+            sudo ufw status

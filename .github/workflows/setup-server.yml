@@ -1,8 +1,6 @@
 name: 1. Setup Server
-
 on:
   workflow_dispatch:
-
 jobs:
   install-platform:
     runs-on: ubuntu-latest
@@ -23,34 +21,29 @@ jobs:
             else
               echo "Docker Compose is already installed."
             fi
-
             # Check if Nginx Proxy Manager is already installed
             if [ -d "/nginx-proxy-manager" ]; then
               echo "Nginx Proxy Manager is already installed."
             else
               echo "Nginx Proxy Manager not found, installing..."
               mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
-
               # Create the Docker Compose file
               filename="docker-compose.yml"
-
               cat << EOF > $filename
-              version: '3.8'
-              services:
-                app:
-                  image: 'jc21/nginx-proxy-manager:latest'
-                  restart: unless-stopped
-                  ports:
-                    - '80:80'
-                    - '81:81'
-                    - '443:443'
-                  volumes:
-                    - ./data:/data
-                    - ./letsencrypt:/etc/letsencrypt
-              EOF
-
+            version: '3.8'
+            services:
+              app:
+                image: 'jc21/nginx-proxy-manager:latest'
+                restart: unless-stopped
+                ports:
+                  - '80:80'
+                  - '81:81'
+                  - '443:443'
+                volumes:
+                  - ./data:/data
+                  - ./letsencrypt:/etc/letsencrypt
+            EOF
               echo "Docker Compose file created."
-
               # Start the Nginx Proxy Manager
               docker-compose up -d
               echo "Nginx Proxy Manager is now running."

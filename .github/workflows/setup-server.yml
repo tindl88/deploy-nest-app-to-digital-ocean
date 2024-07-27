@@ -16,10 +16,10 @@ on:
   workflow_dispatch:
 
 jobs:
-  install-platform:
+  install-server:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect to server and install softwares
+      - name: Connect to server and install software
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.STAGE_SERVER_HOST }}
@@ -27,38 +27,50 @@ jobs:
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
-            # Install Docker compose
-            curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            # Check if Docker Compose is already installed
+            if ! command -v docker-compose &> /dev/null
+            then
+              echo "Docker Compose not found, installing..."
+              sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo chmod +x /usr/local/bin/docker-compose
+            else
+              echo "Docker Compose is already installed."
+            fi
 
-            # Install Nginx Proxy Manager
-            mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
+            # Check if Nginx Proxy Manager is already installed
+            if [ ! -d "~/nginx-proxy-manager" ]; then
+              echo "Nginx Proxy Manager not found, installing..."
+              mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
 
-            # Create the Docker Compose file
-            filename="docker-compose.yml"
+              # Create the Docker Compose file
+              cat << EOF > docker-compose.yml
+              version: '3.8'
+              services:
+                app:
+                  image: 'jc21/nginx-proxy-manager:latest'
+                  restart: unless-stopped
+                  ports:
+                    - '80:80'
+                    - '81:81'
+                    - '443:443'
+                  volumes:
+                    - ./data:/data
+                    - ./letsencrypt:/etc/letsencrypt
+              EOF
 
-            cat << EOF > $filename
-            version: '3.8'
-            services:
-              app:
-                image: 'jc21/nginx-proxy-manager:latest'
-                restart: unless-stopped
-                ports:
-                  - '80:80'
-                  - '81:81'
-                  - '443:443'
-                volumes:
-                  - ./data:/data
-                  - ./letsencrypt:/etc/letsencrypt
-            EOF
+              # Start Nginx Proxy Manager
+              docker-compose up -d
+              echo "Nginx Proxy Manager is now running."
+            else
+              echo "Nginx Proxy Manager is already installed."
+            fi
 
-            echo "Nginx Proxy Manager is now running."
-
-            ufw enable
-            ufw allow 80/tcp
-            ufw allow 443/tcp
-            ufw allow 81/tcp
-            ufw allow 22/tcp # Fix port 22 issue connect on github action
-            ufw reload
-            ufw status
-
+            # Configure UFW
+            echo "Configuring UFW..."
+            sudo ufw allow 80/tcp
+            sudo ufw allow 443/tcp
+            sudo ufw allow 81/tcp
+            sudo ufw allow 22/tcp
+            sudo ufw reload
+            sudo ufw status
             echo "Ports 80, 81, and 443 have been opened."

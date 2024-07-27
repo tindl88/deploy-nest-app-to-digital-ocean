@@ -45,6 +45,7 @@ jobs:
           echo "AP_DB_NAME=$AP_DB_NAME"
           echo "AP_DB_USERNAME=$AP_DB_USERNAME"
           echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}"
+          echo AP_DB_PASSWORD
           echo "AP_DB_SCHEMA=$AP_DB_SCHEMA"
           echo "AP_DB_LOGS=$AP_DB_LOGS"
 

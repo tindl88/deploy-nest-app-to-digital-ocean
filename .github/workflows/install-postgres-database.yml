@@ -54,7 +54,6 @@ jobs:
               -v postgres_data:/var/lib/postgresql/data \
               postgres:14
 
-            # Allow the necessary ports through the firewall
+            # Open port 5432
             sudo ufw allow 5432
             sudo ufw reload
-            sudo ufw status

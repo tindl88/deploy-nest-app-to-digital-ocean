@@ -26,7 +26,8 @@ jobs:
             fi
 
             # Check if Nginx Proxy Manager is already installed
-            if [ -d "/nginx-proxy-manager" ]; then
+            if [ -d "/nginx-proxy-manager" ]
+            then
               echo "Nginx Proxy Manager is already installed."
             else
               echo "Nginx Proxy Manager not found, installing..."

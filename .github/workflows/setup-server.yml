@@ -1,3 +1,15 @@
+# Create a new SSH key
+# ssh-keygen -t rsa
+
+# Connect to server
+# mkdir -p ~/.ssh
+# echo your_public_key >> ~/.ssh/authorized_keys
+
+# ENVIRONMENT VARIABLES
+# STAGE_SERVER_HOST
+# STAGE_SERVER_USERNAME
+# STAGE_SERVER_PRIVATE_SSH_KEY
+
 name: Setup Server
 
 on:
@@ -39,25 +51,11 @@ jobs:
                   - ./letsencrypt:/etc/letsencrypt
             EOF
 
-            echo "Docker Compose file '$filename' has been created."
             echo "Nginx Proxy Manager is now running."
 
-            # Open port 80 (HTTP)
             ufw allow 80/tcp
-
-            # Open port 443 (HTTPS)
             ufw allow 443/tcp
-
-            # Open port 81
             ufw allow 81
-
-            # Fix port 22 issue connect on github action
-            ufw allow 22/tcp
-
-            # Reload UFW to apply changes
             ufw reload
-
-            # Display the status of UFW
-            ufw status
 
             echo "Ports 80, 81, and 443 have been opened."

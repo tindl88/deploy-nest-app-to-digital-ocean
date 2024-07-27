@@ -53,6 +53,7 @@ jobs:
 
             echo "Nginx Proxy Manager is now running."
 
+            ufw enable
             ufw allow 80/tcp
             ufw allow 443/tcp
             ufw allow 81/tcp

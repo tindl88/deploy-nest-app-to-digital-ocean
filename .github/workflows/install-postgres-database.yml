@@ -58,12 +58,7 @@ jobs:
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
             # Print environment variables for debugging
-            echo "AP_DB_PORT=$AP_DB_PORT"
-            echo "AP_DB_NAME=$AP_DB_NAME"
-            echo "AP_DB_USERNAME=$AP_DB_USERNAME"
-            echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}"
-            echo "AP_DB_SCHEMA=$AP_DB_SCHEMA"
-            echo "AP_DB_LOGS=$AP_DB_LOGS"
+            echo AP_DB_PASSWORD
 
             # Pull PostgreSQL image
             docker pull postgres:14

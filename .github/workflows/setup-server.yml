@@ -14,19 +14,21 @@ jobs:
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
             # Check if Docker Compose is already installed
-            if ! command -v docker-compose &> /dev/null
-            then
+            if ! command -v docker-compose &> /dev/null; then
               echo "Docker Compose not found, installing..."
               sudo curl -L "https://github.com/docker/compose/releases/download/v2.29.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              chmod +x /usr/local/bin/docker-compose
             else
               echo "Docker Compose is already installed."
             fi
+
             # Check if Nginx Proxy Manager is already installed
             if [ -d "/nginx-proxy-manager" ]; then
               echo "Nginx Proxy Manager is already installed."
             else
               echo "Nginx Proxy Manager not found, installing..."
               mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
+
               # Create the Docker Compose file
               filename="docker-compose.yml"
               cat << EOF > $filename
@@ -43,7 +45,9 @@ jobs:
                   - ./data:/data
                   - ./letsencrypt:/etc/letsencrypt
             EOF
+
               echo "Docker Compose file created."
+
               # Start the Nginx Proxy Manager
               docker-compose up -d
               echo "Nginx Proxy Manager is now running."

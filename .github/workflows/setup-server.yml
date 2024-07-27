@@ -19,7 +19,7 @@ jobs:
   install-platform:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect to server and install software
+      - name: Connect to server and install softwares
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.STAGE_SERVER_HOST }}
@@ -36,20 +36,19 @@ jobs:
             else
               echo "Docker Compose is already installed."
             fi
-
-            # Check if Nginx Proxy Manager directory exists
-            if [ ! -d "~/nginx-proxy-manager" ]; then
-              echo "Nginx Proxy Manager not found, creating directory..."
-              mkdir ~/nginx-proxy-manager
+            
+            # Check if Nginx Proxy Manager is already installed
+            if [ -d "~/nginx-proxy-manager" ]; then
+              echo "Nginx Proxy Manager is already installed."
             else
-              echo "Nginx Proxy Manager directory already exists."
-            fi
+              echo "Nginx Proxy Manager not found, installing..."
+              mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
 
-            cd ~/nginx-proxy-manager
 
-            # Create the Docker Compose file if it doesn't exist
-            if [ ! -f "docker-compose.yml" ]; then
-              cat << EOF > docker-compose.yml
+              # Create the Docker Compose file
+              filename="docker-compose.yml"
+
+              cat << EOF > $filename
               version: '3.8'
               services:
                 app:
@@ -63,19 +62,6 @@ jobs:
                     - ./data:/data
                     - ./letsencrypt:/etc/letsencrypt
               EOF
-              # Start Nginx Proxy Manager
-              docker-compose up -d
-              echo "Nginx Proxy Manager is now running."
-            else
-              echo "Nginx Proxy Manager is already installed and configured."
-            fi
 
-            # Configure UFW
-            echo "Configuring UFW..."
-            sudo ufw allow 80/tcp
-            sudo ufw allow 443/tcp
-            sudo ufw allow 81/tcp
-            sudo ufw allow 22/tcp
-            sudo ufw reload
-            sudo ufw status
-            echo "Ports 80, 81, and 443 have been opened."
+              echo "Nginx Proxy Manager is now running."
+            fi

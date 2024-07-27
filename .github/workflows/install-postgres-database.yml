@@ -1,4 +1,4 @@
-name: 2. Install PostgreSQL Databases
+name: 2. Install PostgreSQL Database
 
 on:
   workflow_dispatch:
@@ -16,37 +16,27 @@ jobs:
 
       - name: Parse DATABASE secret
         run: |
-          # Debug output for the DATABASE variable
           echo "Parsing DATABASE secret"
 
-          # Split the DATABASE variable by ';'
+          # Split the DATABASE variable by ';' and export each key-value pair
           IFS=';' read -r -a prod_vars <<< "$DATABASE"
-
-          # Print the length of the array for debugging
-          echo "Number of elements: ${#prod_vars[@]}"
-
-          # Export each key-value pair and print for debugging
           for var in "${prod_vars[@]}"; do
             echo "Processing: $var"
-            export $var
+            # Extract the key and value
+            key=${var%%=*}
+            value=${var#*=}
+            # Export the variable
+            echo "$key=$value" >> $GITHUB_ENV
           done
-
-          # Save to $GITHUB_ENV for use in later steps
-          echo "AP_DB_PORT=${AP_DB_PORT}" >> $GITHUB_ENV
-          echo "AP_DB_NAME=${AP_DB_NAME}" >> $GITHUB_ENV
-          echo "AP_DB_USERNAME=${AP_DB_USERNAME}" >> $GITHUB_ENV
-          echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}" >> $GITHUB_ENV
-          echo "AP_DB_SCHEMA=${AP_DB_SCHEMA}" >> $GITHUB_ENV
-          echo "AP_DB_LOGS=${AP_DB_LOGS}" >> $GITHUB_ENV
 
       - name: Verify environment variables
         run: |
-          echo "AP_DB_PORT=$AP_DB_PORT"
-          echo "AP_DB_NAME=$AP_DB_NAME"
-          echo "AP_DB_USERNAME=$AP_DB_USERNAME"
-          echo "AP_DB_PASSWORD=$AP_DB_PASSWORD"
-          echo "AP_DB_SCHEMA=$AP_DB_SCHEMA"
-          echo "AP_DB_LOGS=$AP_DB_LOGS"
+          echo "AP_DB_PORT=${{ env.AP_DB_PORT }}"
+          echo "AP_DB_NAME=${{ env.AP_DB_NAME }}"
+          echo "AP_DB_USERNAME=${{ env.AP_DB_USERNAME }}"
+          echo "AP_DB_PASSWORD=${{ env.AP_DB_PASSWORD }}"
+          echo "AP_DB_SCHEMA=${{ env.AP_DB_SCHEMA }}"
+          echo "AP_DB_LOGS=${{ env.AP_DB_LOGS }}"
 
       - name: Connect to server and install PostgreSQL
         uses: appleboy/ssh-action@v1.0.0
@@ -56,7 +46,13 @@ jobs:
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
-            # Pull PostgreSQL image
+            echo "AP_DB_PORT=${{ env.AP_DB_PORT }}"
+            echo "AP_DB_NAME=${{ env.AP_DB_NAME }}"
+            echo "AP_DB_USERNAME=${{ env.AP_DB_USERNAME }}"
+            echo "AP_DB_PASSWORD=${{ env.AP_DB_PASSWORD }}"
+            echo "AP_DB_SCHEMA=${{ env.AP_DB_SCHEMA }}"
+            echo "AP_DB_LOGS=${{ env.AP_DB_LOGS }}"
+
             docker pull postgres:14
 
             # Stop and remove existing container if it exists
@@ -66,9 +62,9 @@ jobs:
             # Run Database
             docker run -d \
               --name postgres_db \
-              -e POSTGRES_PASSWORD=${AP_DB_PASSWORD} \
-              -e POSTGRES_USER=${AP_DB_USERNAME} \
-              -e POSTGRES_DB=${AP_DB_NAME} \
+              -e POSTGRES_PASSWORD=${{ env.AP_DB_PASSWORD }} \
+              -e POSTGRES_USER=${{ env.AP_DB_USERNAME }} \
+              -e POSTGRES_DB=${{ env.AP_DB_NAME }} \
               -p 5432:5432 \
               -v postgres_data:/var/lib/postgresql/data \
               postgres:14

@@ -35,9 +35,9 @@ jobs:
             # Run Database
             docker run -d \
               --name postgres_db \
-              -e POSTGRES_PASSWORD=${{ env.AP_DB_PASSWORD }} \
-              -e POSTGRES_USER=${{ env.AP_DB_USERNAME }} \
-              -e POSTGRES_DB=${{ env.AP_DB_NAME }} \
+              -e POSTGRES_PASSWORD=$AP_DB_PASSWORD \
+              -e POSTGRES_USER=$AP_DB_USERNAME \
+              -e POSTGRES_DB=$AP_DB_NAME \
               -p 5432:5432 \
               -v postgres_data:/var/lib/postgresql/data \
               postgres:14

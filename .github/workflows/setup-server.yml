@@ -36,7 +36,7 @@ jobs:
             else
               echo "Docker Compose is already installed."
             fi
-            
+
             # Check if Nginx Proxy Manager is already installed
             if [ -d "~/nginx-proxy-manager" ]; then
               echo "Nginx Proxy Manager is already installed."

@@ -1,4 +1,4 @@
-name: 2. Install PostgreSQL Database
+name: 2. Install PostgreSQL Databases
 
 on:
   workflow_dispatch:
@@ -18,16 +18,12 @@ jobs:
         run: |
           echo "Parsing DATABASE secret"
 
-          # Split the DATABASE variable by ';' and export each key-value pair
-          IFS=';' read -r -a prod_vars <<< "$DATABASE"
-          for var in "${prod_vars[@]}"; do
-            echo "Processing: $var"
-            # Extract the key and value
-            key=${var%%=*}
-            value=${var#*=}
-            # Export the variable
-            echo "$key=$value" >> $GITHUB_ENV
-          done
+          # Process the multi-line secret
+          while IFS= read -r line; do
+            echo "Processing: $line"
+            # Export each line as an environment variable
+            echo "$line" >> $GITHUB_ENV
+          done <<< "$DATABASE"
 
       - name: Verify environment variables
         run: |

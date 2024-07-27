@@ -10,16 +10,16 @@
 # STAGE_SERVER_USERNAME
 # STAGE_SERVER_PRIVATE_SSH_KEY
 
-name: Setup Server
+name: 1. Setup Server
 
 on:
   workflow_dispatch:
 
 jobs:
-  install-server:
+  install-platform:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect to server and install software
+      - name: Connect to server and install softwares
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.STAGE_SERVER_HOST }}
@@ -42,35 +42,7 @@ jobs:
               echo "Nginx Proxy Manager not found, installing..."
               mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
 
-              # Create the Docker Compose file
-              cat << EOF > docker-compose.yml
-              version: '3.8'
-              services:
-                app:
-                  image: 'jc21/nginx-proxy-manager:latest'
-                  restart: unless-stopped
-                  ports:
-                    - '80:80'
-                    - '81:81'
-                    - '443:443'
-                  volumes:
-                    - ./data:/data
-                    - ./letsencrypt:/etc/letsencrypt
-              EOF
-
-              # Start Nginx Proxy Manager
-              docker-compose up -d
               echo "Nginx Proxy Manager is now running."
             else
               echo "Nginx Proxy Manager is already installed."
             fi
-
-            # Configure UFW
-            echo "Configuring UFW..."
-            sudo ufw allow 80/tcp
-            sudo ufw allow 443/tcp
-            sudo ufw allow 81/tcp
-            sudo ufw allow 22/tcp
-            sudo ufw reload
-            sudo ufw status
-            echo "Ports 80, 81, and 443 have been opened."

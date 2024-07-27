@@ -29,8 +29,7 @@ jobs:
               echo "Nginx Proxy Manager is already installed."
             else
               echo "Nginx Proxy Manager not found, installing..."
-              mkdir /nginx-proxy-manager
-              cd /nginx-proxy-manager
+              mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
 
               # Create the Docker Compose file
               filename="docker-compose.yml"
@@ -49,6 +48,7 @@ jobs:
                     - ./data:/data
                     - ./letsencrypt:/etc/letsencrypt
               EOF
+
               echo "Docker Compose file created."
 
               # Start the Nginx Proxy Manager

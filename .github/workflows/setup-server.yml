@@ -1,15 +1,3 @@
-# Create a new SSH key
-# ssh-keygen -t rsa
-
-# Connect to server
-# mkdir -p ~/.ssh
-# echo your_public_key >> ~/.ssh/authorized_keys
-
-# ENVIRONMENT VARIABLES
-# STAGE_SERVER_HOST
-# STAGE_SERVER_USERNAME
-# STAGE_SERVER_PRIVATE_SSH_KEY
-
 name: 1. Setup Server
 
 on:
@@ -19,7 +7,7 @@ jobs:
   install-platform:
     runs-on: ubuntu-latest
     steps:
-      - name: Connect to server and install softwares
+      - name: Connect to server and install software
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.STAGE_SERVER_HOST }}
@@ -44,11 +32,8 @@ jobs:
               echo "Nginx Proxy Manager not found, installing..."
               mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
 
-
               # Create the Docker Compose file
-              filename="docker-compose.yml"
-
-              cat << EOF > $filename
+              cat << 'EOF' > docker-compose.yml
               version: '3.8'
               services:
                 app:
@@ -63,5 +48,9 @@ jobs:
                     - ./letsencrypt:/etc/letsencrypt
               EOF
 
+              echo "Docker Compose file created."
+
+              # Start the Nginx Proxy Manager
+              docker-compose up -d
               echo "Nginx Proxy Manager is now running."
             fi

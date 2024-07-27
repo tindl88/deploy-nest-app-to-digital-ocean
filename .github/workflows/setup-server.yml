@@ -13,7 +13,7 @@ jobs:
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
-            apt install docker.io
+            apt-get install -y docker.io
 
             # Check if Docker Compose is already installed
             if ! command -v docker-compose &> /dev/null
@@ -57,10 +57,13 @@ jobs:
             # Configure UFW
             echo "Configuring UFW..."
             sudo ufw enable
-            sudo ufw allow 80/tcp
-            sudo ufw allow 443/tcp
-            sudo ufw allow 81/tcp
-            sudo ufw allow 22/tcp
+            sudo ufw allow 80
+            sudo ufw allow 443
+            sudo ufw allow 81
+            sudo ufw allow 22
+            #sudo ufw allow from 203.0.113.101
+            #sudo ufw delete allow from 203.0.113.101
             sudo ufw reload
             sudo ufw status
+
             echo "Ports 80, 81, and 443 have been opened."

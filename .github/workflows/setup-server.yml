@@ -32,7 +32,6 @@ jobs:
               # Create the Docker Compose file
               filename="docker-compose.yml"
               cat << EOF > $filename
-            version: '3.8'
             services:
               app:
                 image: 'jc21/nginx-proxy-manager:latest'

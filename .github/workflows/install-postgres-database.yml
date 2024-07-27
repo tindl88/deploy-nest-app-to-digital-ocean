@@ -4,19 +4,19 @@ on:
   workflow_dispatch:
 
 env:
-  POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+  STAGE_ENV: ${{ secrets.STAGE_ENV }}
 
 jobs:
   install-postgres:
     runs-on: ubuntu-latest
     steps:
-      - name: Parse POSTGRES_DB secret
+      - name: Parse STAGE_ENV secret
         run: |
-          echo "Parsing POSTGRES_DB secret"
+          echo "Parsing STAGE_ENV secret"
 
           while IFS= read -r line; do
             echo "$line" >> $GITHUB_ENV
-          done <<< "$POSTGRES_DB"
+          done <<< "$STAGE_ENV"
 
       - name: Connect to server and install PostgreSQL
         uses: appleboy/ssh-action@v1.0.0

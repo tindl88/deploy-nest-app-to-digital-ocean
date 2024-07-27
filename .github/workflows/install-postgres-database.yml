@@ -4,21 +4,28 @@ on:
   workflow_dispatch:
 
 env:
-  DATABASE_PROD: ${{ secrets.POSTGRES_DB }}
-  DATABASE_TEST: ${{ secrets.DATABASE_TEST }}
+  DATABASE: ${{ secrets.POSTGRES_DB }}
 
 jobs:
   install-postgres:
     runs-on: ubuntu-latest
     steps:
-      - name: Parse DATABASE_PROD secret
-        id: parse_prod
+      - name: Parse DATABASE secret
         run: |
-          IFS=';' read -r -a prod_vars <<< "${{ env.DATABASE_PROD }}"
+          # Split the DATABASE variable by ';'
+          IFS=';' read -r -a prod_vars <<< "${{ env.DATABASE }}"
+          # Export each key-value pair
           for var in "${prod_vars[@]}"; do
+            echo "$var"
             export $var
-            echo "$var" >> $GITHUB_ENV
           done
+          # Save to $GITHUB_ENV for use in later steps
+          echo "AP_DB_PORT=${AP_DB_PORT}" >> $GITHUB_ENV
+          echo "AP_DB_NAME=${AP_DB_NAME}" >> $GITHUB_ENV
+          echo "AP_DB_USERNAME=${AP_DB_USERNAME}" >> $GITHUB_ENV
+          echo "AP_DB_PASSWORD=${AP_DB_PASSWORD}" >> $GITHUB_ENV
+          echo "AP_DB_SCHEMA=${AP_DB_SCHEMA}" >> $GITHUB_ENV
+          echo "AP_DB_LOGS=${AP_DB_LOGS}" >> $GITHUB_ENV
 
       - name: Connect to server and install PostgreSQL
         uses: appleboy/ssh-action@v1.0.0
@@ -29,13 +36,6 @@ jobs:
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
             docker pull postgres:14
-
-            # AP_DB_PORT=5432
-            # AP_DB_NAME=postgres
-            # AP_DB_USERNAME=postgres
-            # AP_DB_PASSWORD=postgres
-            # AP_DB_SCHEMA=public
-            # AP_DB_LOGS=true
 
             echo "AP_DB_PORT=$AP_DB_PORT"
             echo "AP_DB_NAME=$AP_DB_NAME"

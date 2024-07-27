@@ -33,7 +33,22 @@ jobs:
               cd /nginx-proxy-manager
 
               # Create the Docker Compose file
+              filename="docker-compose.yml"
 
+              cat << EOF > $filename
+              version: '3.8'
+              services:
+                app:
+                  image: 'jc21/nginx-proxy-manager:latest'
+                  restart: unless-stopped
+                  ports:
+                    - '80:80'
+                    - '81:81'
+                    - '443:443'
+                  volumes:
+                    - ./data:/data
+                    - ./letsencrypt:/etc/letsencrypt
+              EOF
               echo "Docker Compose file created."
 
               # Start the Nginx Proxy Manager

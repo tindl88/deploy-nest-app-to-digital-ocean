@@ -47,6 +47,7 @@ jobs:
                   volumes:
                     - ./data:/data
                     - ./letsencrypt:/etc/letsencrypt
+
               EOF
 
               echo "Docker Compose file created."

@@ -33,27 +33,6 @@ jobs:
               mkdir ~/nginx-proxy-manager && cd ~/nginx-proxy-manager
 
               # Create the Docker Compose file
-              filename="docker-compose.yml"
-
-              # Create the Docker Compose file
-              cat << EOF > $filename
-              version: '3.8'
-              services:
-                app:
-                  image: 'jc21/nginx-proxy-manager:latest'
-                  restart: unless-stopped
-                  ports:
-                    - '80:80'
-                    - '81:81'
-                    - '443:443'
-                  volumes:
-                    - ./data:/data
-                    - ./letsencrypt:/etc/letsencrypt
-              EOF
-
-              # Optionally, display the contents of the file
-              echo "Contents of $filename:"
-              cat $filename
 
               echo "Docker Compose file created."
 

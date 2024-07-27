@@ -13,6 +13,8 @@ jobs:
           port: 22
           key: ${{ secrets.STAGE_SERVER_PRIVATE_SSH_KEY }}
           script: |
+            apt install docker.io
+
             # Check if Docker Compose is already installed
             if ! command -v docker-compose &> /dev/null; then
               echo "Docker Compose not found, installing..."
